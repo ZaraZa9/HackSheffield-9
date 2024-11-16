@@ -1,5 +1,7 @@
 import streamlit as st
 from pymongo import MongoClient
+import os
+import google.generativeai as genai
 
 def run_streamlit():
 
@@ -85,9 +87,32 @@ def run_streamlit():
 
 
 def brain_rot_translate(input_text):
-    """
-    Placeholder translation function.
-    """
+
+    genai.configure(api_key=os.environ["AIzaSyBmDZVx7t5TIQKxYH965m1Dp9Dk9twOP4M"])
+
+    # Create the model
+    generation_config = {
+    "temperature": 1,
+    "top_p": 0.95,
+    "top_k": 40,
+    "max_output_tokens": 8192,
+    "response_mime_type": "text/plain",
+    }
+
+    model = genai.GenerativeModel(
+    model_name="gemini-1.5-flash",
+    generation_config=generation_config,
+    system_instruction="Using this dataset, translate input text into \"brainrot\" (brainrot refers to gen z/gen alpha internet slang).",
+    )
+
+    chat_session = model.start_chat(
+    history=[
+    ]
+    )
+
+    response = chat_session.send_message("INSERT_INPUT_HERE")
+
+    print(response.text)
     return input_text[::-1]
 
 if __name__ == "__main__":
