@@ -73,10 +73,14 @@ def run_streamlit():
     text_input = st.text_input('Enter some text')
     if text_input is not None:
         st.text(f"Text input:\n{text_input}")
-    st.write("Upload your input file here (only .txt files).")
-    uploaded_file = st.file_uploader("Choose a file", type="txt")
+    st.write("Upload your input file here (pdfs or .txt).")
+    uploaded_file = st.file_uploader("Choose a file", type="txt,pdf")
 
     if uploaded_file:
+        if uploaded_file.type == "application/pdf":
+            input_text = pdf_to_text(uploaded_file, "temp.txt")
+            with open("temp.txt", "r") as f:
+                input_text = f.read().decode("utf-8")
       
         input_text = uploaded_file.read().decode("utf-8")
         
@@ -123,6 +127,6 @@ def brain_rot_translate(input_text):
     return input_text[::-1]
 
 if __name__ == "__main__":
-    # run_streamlit()
-    pdf_to_text("Cover_Letter_JPM.pdf", "output.txt")
+    run_streamlit()
+
 
