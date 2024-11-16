@@ -5,19 +5,19 @@ from PyPDF2 import PdfReader
 import streamlit as st
 import google.generativeai as genai
 
-
+# Load environment variables
 load_dotenv()
 
-
+# MongoDB connection
 CONNECTION_STRING = os.getenv("MONGO_CONNECTION_STRING")
 client = MongoClient(CONNECTION_STRING)
 db = client["brain_rot"]
 collection = db["brain_rot_collection"]
 
-
+# Generative AI configuration
 genai.configure(api_key=os.getenv("GOOGLE_GENAI_API_KEY"))
 
-
+# Helper function to extract text from PDF
 def pdf_to_text(input_pdf):
     reader = PdfReader(input_pdf)
     extracted_text = ""
@@ -25,30 +25,46 @@ def pdf_to_text(input_pdf):
         extracted_text += page.extract_text()
     return extracted_text
 
-
-def brain_rot_translate(input_text):
+# Brain Rot Translator Function
+def brain_rot_translate(input_text, decade_data=None):
     generation_config = {
-        "temperature": 1,
+        "temperature": 2.0,
         "top_p": 0.95,
         "top_k": 40,
         "max_output_tokens": 8192,
     }
 
+    # Use decade data if available
+    if decade_data:
+        dataset_info = "\n".join([f"{entry['word']}: {entry['definition']}" for entry in decade_data])
+        system_instruction = (
+            "Using the following dataset, translate input text into 'brainrot' "
+            "(brainrot refers to Gen Z/Gen Alpha internet slang):\n"
+            f"{dataset_info}\n"
+        )
+    else:
+        system_instruction = (
+            "Translate the input text into 'brainrot' (Gen Z/Gen Alpha internet slang)."
+        )
+
+    # Set up the Generative AI model
     model = genai.GenerativeModel(
         model_name="gemini-1.5-flash",
         generation_config=generation_config,
-        system_instruction="Using this dataset, translate input text into 'brainrot' (brainrot refers to Gen Z/Gen Alpha internet slang).",
+        system_instruction=system_instruction,
     )
 
+    # Start a chat session and generate the response
     chat_session = model.start_chat(history=[])
     response = chat_session.send_message(input_text)
     return response.text
 
-
+# Streamlit app
 def run_streamlit():
+    # Set up the Streamlit app title
     st.title("Word Definitions Over the Years")
 
-    # Fetch Words by Decade
+    # Sidebar to select decade
     st.sidebar.title("Explore by Decade")
     decade_options = [
         "1990-1999",
@@ -56,44 +72,46 @@ def run_streamlit():
         "2010-2019",
         "2020-2029",
     ]
-    decade = st.sidebar.selectbox("Select a Decade", decade_options)
-    fetch_submitted_decade = st.sidebar.button("Fetch Words by Decade")
+    selected_decade = st.sidebar.selectbox("Select a Decade", decade_options)
 
-    if fetch_submitted_decade:
-        document = collection.find_one({"decade": decade})
+    # Fetch Words by Decade
+    if "decade_data" not in st.session_state:
+        st.session_state["decade_data"] = None
+
+    if st.sidebar.button("Fetch Words by Decade"):
+        document = collection.find_one({"decade": selected_decade})
         if document and "words" in document:
-            st.write(f"Words and Definitions for the Decade {decade}:")
-            for entry in document["words"]:
+            st.session_state["decade_data"] = document["words"]
+            st.write(f"Words and Definitions for the Decade {selected_decade}:")
+            for entry in st.session_state["decade_data"]:
                 st.write(f"- **{entry['word']}**: {entry['definition']}")
         else:
-            st.warning(f"No words found for the decade {decade}.")
+            st.warning(f"No words found for the decade {selected_decade}.")
+            st.session_state["decade_data"] = None
 
-
-
-    # Brain Rot Translator
+    # Brain Rot Translator Section
     st.title("Brain Rot Translator")
     text_input = st.text_input("Enter some text")
     uploaded_file = st.file_uploader("Upload a file (PDF or TXT)", type=["pdf", "txt"])
 
+    input_text = ""
     if uploaded_file:
         if uploaded_file.type == "application/pdf":
             input_text = pdf_to_text(uploaded_file)
         else:
             input_text = uploaded_file.read().decode("utf-8")
-        
+
         st.write("File uploaded successfully.")
         st.text_area("File Contents", input_text, height=200, disabled=True)
 
-        if st.button("Translate"):
-            translated_text = brain_rot_translate(input_text)
-            st.text_area("Translated Output", translated_text, height=200)
-
-    # Manual Translation
     if text_input:
-        st.text_area("Input Text", text_input, height=100, disabled=True)
-        if st.button("Translate Text"):
-            translated_text = brain_rot_translate(text_input)
-            st.text_area("Translated Output", translated_text, height=200)
+        input_text = text_input
+        st.text_area("Input Text", input_text, height=100, disabled=True)
 
+    if input_text and st.button("Translate"):
+        translated_text = brain_rot_translate(input_text, decade_data=st.session_state.get("decade_data"))
+        st.text_area("Translated Output", translated_text, height=200)
+
+# Run the Streamlit app
 if __name__ == "__main__":
     run_streamlit()
