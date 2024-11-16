@@ -2,11 +2,6 @@ import streamlit as st
 from pymongo import MongoClient
 
 def run_streamlit():
-
-
-
-
-
     CONNECTION_STRING = "mongodb+srv://weitongsun01:qDUa12YFsLz1NCgd@cluster0.hxmx9.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
     client = MongoClient(CONNECTION_STRING)
 
