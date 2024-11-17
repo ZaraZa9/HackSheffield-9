@@ -893,3 +893,103 @@ Year: 2010
 Type: Noun
 Synonyms: Hit, great song
 Definition: A term used to describe a particularly good or popular song, often one with a strong beat or catchy melody.
+As if!
+Year: 1995
+Type: Phrase
+Synonyms: No way, yeah right
+Definition: Popularized by the movie Clueless, this sarcastic phrase dismisses an idea or suggestion as ridiculous.
+Talk to the hand
+Year: 1993
+Type: Phrase
+Synonyms: Whatever, stop talking
+Definition: A dismissive gesture and phrase implying that further discussion is pointless.
+All that and a bag of chips
+Year: 1994
+Type: Phrase
+Synonyms: Amazing, the best
+Definition: A slang phrase used to describe someone or something as exceptionally cool or impressive.
+Boo ya!
+Year: 1992
+Type: Exclamation
+Synonyms: Victory cry, gotcha
+Definition: An exclamation of triumph or success, often used in sports or playful arguments.
+Phat
+Year: 1990
+Type: Adjective
+Synonyms: Cool, stylish, excellent
+Definition: Slang for something that is excellent or attractive, often used in hip-hop culture.
+Fly
+Year: 1992
+Type: Adjective
+Synonyms: Attractive, stylish
+Definition: A term to describe someone or something fashionable or impressive.
+Da bomb
+Year: 1996
+Type: Phrase
+Synonyms: Amazing, outstanding
+Definition: A phrase used to emphasize how great or excellent something is.
+Jiggy
+Year: 1997
+Type: Adjective
+Synonyms: Fun, stylish, exciting
+Definition: Popularized by Will Smith's song Gettin' Jiggy Wit It, meaning stylish or having a good time.
+Whatever!
+Year: 1991
+Type: Exclamation
+Synonyms: Dismissive, indifferent
+Definition: A sarcastic or dismissive response to something unimportant or annoying.
+Scrub
+Year: 1999
+Type: Noun
+Synonyms: Loser, wannabe
+Definition: Popularized by TLC's song No Scrubs, referring to a person who is unsuccessful or undesirable, especially in relationships.
+My bad
+Year: 1995
+Type: Phrase
+Synonyms: Sorry, my mistake
+Definition: A casual way to acknowledge fault or apologize for a mistake.
+Homey
+Year: 1990
+Type: Noun
+Synonyms: Friend, close associate
+Definition: Slang for a close friend, often associated with urban culture and hip-hop.
+No duh
+Year: 1993
+Type: Phrase
+Synonyms: Obviously, of course
+Definition: A sarcastic way to express that something is obvious.
+Yada yada yada
+Year: 1997
+Type: Phrase
+Synonyms: And so on, etcetera
+Definition: Popularized by Seinfeld, used to skip over boring or repetitive details in a story.
+Don't go there
+Year: 1995
+Type: Phrase
+Synonyms: Avoid it, stay away
+Definition: A warning not to bring up a sensitive or controversial topic.
+Bling
+Year: 1999
+Type: Noun
+Synonyms: Jewelry, flashy items
+Definition: A term for flashy, ostentatious jewelry, popularized in hip-hop culture.
+Word
+Year: 1990
+Type: Exclamation
+Synonyms: Agree, true
+Definition: A slang term used to affirm or agree with something someone said.
+Hella
+Year: 1992
+Type: Adverb
+Synonyms: Very, really
+Definition: Slang from Northern California meaning "a lot" or "very."
+Psyche!
+Year: 1991
+Type: Exclamation
+Synonyms: Just kidding, fooled you
+Definition: A playful way of saying "I was just kidding" after teasing or joking.
+Chillax
+Year: 1999
+Type: Verb
+Synonyms: Relax, calm down
+Definition: A combination of "chill" and "relax," meaning to take it easy or calm down.

@@ -1,23 +1,36 @@
 import os
+import time
 from dotenv import load_dotenv
+import openai
 from pymongo import MongoClient
 from PyPDF2 import PdfReader
 import streamlit as st
+import matplotlib.pyplot as plt
+from io import BytesIO
 import google.generativeai as genai
+from openai import OpenAI
+from helpers.frequency import word_frequency
+from matplotlib.colors import LinearSegmentedColormap
+import numpy as np
+import pandas as pd
+import altair as alt
+import streamlit as st
+import matplotlib.pyplot as plt
+from io import BytesIO
 
-# Load environment variables
-load_dotenv()
 
-# MongoDB connection
-CONNECTION_STRING = os.getenv("MONGO_CONNECTION_STRING")
+
+openAI_client = OpenAI(st.secrets["OPENAI_API_KEY"])
+
+
+CONNECTION_STRING = st.secrets["MONGO_CONNECTION_STRING"]
 client = MongoClient(CONNECTION_STRING)
 db = client["brain_rot"]
 collection = db["brain_rot_collection"]
+frequency_collection = db["brain_rot_frequency_collection"]
 
-# Generative AI configuration
-genai.configure(api_key=os.getenv("GOOGLE_GENAI_API_KEY"))
+genai.configure(api_key=st.secrets["GOOGLE_GENAI_API_KEY"])
 
-# Helper function to extract text from PDF
 def pdf_to_text(input_pdf):
     reader = PdfReader(input_pdf)
     extracted_text = ""
@@ -25,8 +38,39 @@ def pdf_to_text(input_pdf):
         extracted_text += page.extract_text()
     return extracted_text
 
-# Brain Rot Translator Function
-def brain_rot_translate(input_text, decade_data=None):
+
+
+
+
+import pandas as pd
+import streamlit as st
+
+def plot_streamlit_histogram(selected_decade):
+    document = frequency_collection.find_one({"decade": selected_decade})
+    
+    if document is None:
+        st.sidebar.error(f"No data found for the selected decade: {selected_decade}")
+        return
+    
+
+    word_frequencies = document.get("words", {})
+    
+
+    sorted_words = sorted(word_frequencies.items(), key=lambda x: x[1], reverse=True)[:10]
+    words, frequencies = zip(*sorted_words)
+
+
+    data = pd.DataFrame({
+        "Word": words,
+        "Frequency": frequencies
+    })
+
+    # display the bar chart in the sidebar
+    st.sidebar.subheader("Top 10 Word Frequencies")
+    st.sidebar.bar_chart(data.set_index('Word')['Frequency'])
+
+
+def brain_rot_translate(input_text, selected_decade, decade_data=None):
     generation_config = {
         "temperature": 2.0,
         "top_p": 0.95,
@@ -34,11 +78,10 @@ def brain_rot_translate(input_text, decade_data=None):
         "max_output_tokens": 8192,
     }
 
-    # Use decade data if available
     if decade_data:
         dataset_info = "\n".join([f"{entry['word']}: {entry['definition']}" for entry in decade_data])
         system_instruction = (
-            "Using the following dataset, translate input text into 'brainrot' "
+            "Using the following dataset, translate input text into 'brainrot' - try not to use the words so uniformly: - use the ones that make sence given the context\n"
             "(brainrot refers to Gen Z/Gen Alpha internet slang):\n"
             f"{dataset_info}\n"
         )
@@ -47,24 +90,64 @@ def brain_rot_translate(input_text, decade_data=None):
             "Translate the input text into 'brainrot' (Gen Z/Gen Alpha internet slang)."
         )
 
-    # Set up the Generative AI model
     model = genai.GenerativeModel(
         model_name="gemini-1.5-flash",
         generation_config=generation_config,
         system_instruction=system_instruction,
     )
 
-    # Start a chat session and generate the response
     chat_session = model.start_chat(history=[])
     response = chat_session.send_message(input_text)
-    return response.text
+    
 
-# Streamlit app
+    decade_data_words = [entry["word"] for entry in decade_data] if decade_data else []
+    rot_frequency = word_frequency(response.text, decade_data_words)
+
+
+    doc = frequency_collection.find_one({"decade": selected_decade})
+    if doc:
+        existing_frequencies = doc.get("words", {})
+        for word, freq in rot_frequency.items():
+            if word in existing_frequencies:
+                existing_frequencies[word] += freq
+            else:
+                existing_frequencies[word] = freq
+
+        frequency_collection.update_one(
+            {"decade": selected_decade},
+            {"$set": {"words": existing_frequencies}}
+        )
+    else:
+        frequency_collection.insert_one({
+            "decade": selected_decade,
+            "words": rot_frequency
+        })
+
+    return response.text, rot_frequency
+
+def generate_image_with_rate_limit(img_prompt):
+    img_response = openAI_client.images.generate(
+        model="dall-e-3",
+        prompt="A surreal image of " + img_prompt,
+        size="1024x1024",
+        quality="standard",
+        n=1,
+    )
+
+    return img_response.data[0].url
+
+
+
 def run_streamlit():
-    # Set up the Streamlit app title
-    st.title("Word Definitions Over the Years")
+    st.title("BRAIN.ROT.co.uk")
+    st.write("Welcome to BrainRot - the only internet solution that visualizes the state of degradation of the English language throughout the years.")
+    st.write("This is a tool that translates text into 'brainrot' - Gen Z/Gen Alpha internet slang.")
+    st.write("Consider our solution a case study of how exposure to the internet has affected the way we communicate.")
+    st.write("The way it works is simple: you input some text, and we translate it into 'brainrot', and maybe visualize it - at your own risk...")
+    st.write("The solution itself consists of an AI model that is trained on a dataset of words and definitions from different decades.")
+    st.write("Hence, you can observe how slang use has evolved over time.")
 
-    # Sidebar to select decade
+
     st.sidebar.title("Explore by Decade")
     decade_options = [
         "1990-1999",
@@ -74,22 +157,23 @@ def run_streamlit():
     ]
     selected_decade = st.sidebar.selectbox("Select a Decade", decade_options)
 
-    # Fetch Words by Decade
-    if "decade_data" not in st.session_state:
-        st.session_state["decade_data"] = None
-
-    if st.sidebar.button("Fetch Words by Decade"):
+    if "decade_data" not in st.session_state or st.session_state.get("current_decade") != selected_decade:
         document = collection.find_one({"decade": selected_decade})
         if document and "words" in document:
             st.session_state["decade_data"] = document["words"]
-            st.write(f"Words and Definitions for the Decade {selected_decade}:")
-            for entry in st.session_state["decade_data"]:
-                st.write(f"- **{entry['word']}**: {entry['definition']}")
         else:
-            st.warning(f"No words found for the decade {selected_decade}.")
-            st.session_state["decade_data"] = None
+            st.session_state["decade_data"] = []
+        st.session_state["current_decade"] = selected_decade
 
-    # Brain Rot Translator Section
+    # fetch and display histogram
+    if st.sidebar.button("Fetch Words by Decade"):
+        st.sidebar.write(f"Words and Definitions for the Decade {selected_decade}:")
+        if st.session_state["decade_data"]:
+            for entry in st.session_state["decade_data"]:
+                st.sidebar.write(f"- **{entry['word']}**: {entry['definition']}")
+        else:
+            st.sidebar.warning(f"No words found for the decade {selected_decade}.")
+
     st.title("Brain Rot Translator")
     text_input = st.text_input("Enter some text")
     uploaded_file = st.file_uploader("Upload a file (PDF or TXT)", type=["pdf", "txt"])
@@ -108,10 +192,42 @@ def run_streamlit():
         input_text = text_input
         st.text_area("Input Text", input_text, height=100, disabled=True)
 
+    generate_images_checkbox = st.checkbox("Generate Images Before and After Translation")
+
+    translated_text = "" 
+    word_frequencies = {}
+
     if input_text and st.button("Translate"):
-        translated_text = brain_rot_translate(input_text, decade_data=st.session_state.get("decade_data"))
+        if generate_images_checkbox:
+            with st.spinner("Generating pre-translation image..."):
+                pre_translation_image_url = generate_image_with_rate_limit(input_text)
+                if pre_translation_image_url:
+                    st.image(pre_translation_image_url, caption="Image Before Translation", use_column_width=True)
+
+        #perform the translation
+        translated_text, word_frequencies = brain_rot_translate(
+            input_text, selected_decade, decade_data=st.session_state.get("decade_data")
+        )
         st.text_area("Translated Output", translated_text, height=200)
 
-# Run the Streamlit app
+        if generate_images_checkbox:
+            with st.spinner("Generating post-translation image..."):
+                post_translation_image_url = generate_image_with_rate_limit(translated_text)
+                if post_translation_image_url:
+                    st.image(post_translation_image_url, caption="Image After Translation", use_column_width=True)
+
+        if word_frequencies:
+            st.sidebar.subheader("Word Frequency Histogram")
+            histogram_buf = plot_streamlit_histogram(selected_decade)
+            if histogram_buf:
+                st.sidebar.image(histogram_buf, caption="Top 10 Word Frequencies", use_column_width=True)
+
+    if not input_text:
+        st.sidebar.warning("Please enter or upload text for translation.")
+    if not translated_text:
+        st.sidebar.warning("No translation performed yet.")
+
+
+
 if __name__ == "__main__":
     run_streamlit()
