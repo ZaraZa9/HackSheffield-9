@@ -118,8 +118,8 @@ def brain_rot_translate(input_text, selected_decade, decade_data=None):
 
 
 def generate_image_with_rate_limit(img_prompt):
-    if "OPENAI_API_KEY" not in st.secrets or not st.secrets["OPENAI_API_KEY"]:
-        st.write("OpenAI API key not found. Please set the OPENAI_API_KEY")
+    #if "OPENAI_API_KEY" not in st.secrets or not st.secrets["OPENAI_API_KEY"]:
+    #    st.write("OpenAI API key not found. Please set the OPENAI_API_KEY")
     if not img_prompt or not img_prompt.strip():
         raise ValueError("Image prompt cannot be empty.")
 
@@ -178,6 +178,7 @@ def run_streamlit():
     uploaded_file = st.file_uploader("Upload a file (PDF or TXT)", type=["pdf", "txt"])
 
     input_text = ""
+    st.write(uploaded_file)
     if uploaded_file:
         if uploaded_file.type == "application/pdf":
             input_text = pdf_to_text(uploaded_file)
