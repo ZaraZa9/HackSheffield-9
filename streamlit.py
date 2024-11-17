@@ -191,6 +191,9 @@ def run_streamlit():
     if input_text and st.button("Translate"):
         if generate_images_checkbox:
             with st.spinner("Generating pre-translation image..."):
+                st.write(input_text)
+                st.write(selected_decade)
+                st.write("LOOK HERE")
                 pre_translation_image_url = generate_image_with_rate_limit(input_text)
                 if pre_translation_image_url:
                     st.image(pre_translation_image_url, caption="Image Before Translation", use_column_width=True)
