@@ -116,19 +116,23 @@ def brain_rot_translate(input_text, selected_decade, decade_data=None):
 
     return response.text, rot_frequency
 
+
 def generate_image_with_rate_limit(img_prompt):
-    st.write(openAI_client)
-    st.write(img_prompt)
-    img_response = openAI_client.images.generate(
-        model="dall-e-3",
-        prompt="A surreal image of " + img_prompt,
-        size="1024x1024",
-        quality="standard",
-        n=1,
-    )
+    if not img_prompt or not img_prompt.strip():
+        raise ValueError("Image prompt cannot be empty.")
 
-    return img_response.data[0].url
-
+    try:
+        img_response = openAI_client.images.generate(
+            model="dall-e-3",
+            prompt="A surreal image of " + img_prompt,
+            size="1024x1024",
+            quality="standard",
+            n=1,
+        )
+        return img_response.data[0].url
+    
+    except Exception as e:
+        st.error("Rate limit exceeded. Please try again later.")
 
 
 def run_streamlit():
