@@ -130,7 +130,7 @@ def generate_image_with_rate_limit(img_prompt):
 
 
 def run_streamlit():
-    st.title("BRAIN.ROT.co.uk")
+    st.title("BRAIN.ROT.with.us")
     st.write("Welcome to BrainRot - the only internet solution that visualizes the state of degradation of the English language throughout the years.")
     st.write("This is a tool that translates text into 'brainrot' - Gen Z/Gen Alpha internet slang.")
     st.write("Consider our solution a case study of how exposure to the internet has affected the way we communicate.")
