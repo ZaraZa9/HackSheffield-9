@@ -1,20 +1,13 @@
-import os
-import time
-from dotenv import load_dotenv
 import openai
 from pymongo import MongoClient
 from PyPDF2 import PdfReader
 import streamlit as st
-from io import BytesIO
 import google.generativeai as genai
 from openai import OpenAI
 from helpers.frequency import word_frequency
-from matplotlib.colors import LinearSegmentedColormap
-import numpy as np
 import pandas as pd
-import altair as alt
 import streamlit as st
-from io import BytesIO
+
 
 
 
