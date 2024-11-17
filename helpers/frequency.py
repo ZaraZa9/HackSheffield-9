@@ -1,6 +1,3 @@
-import matplotlib.pyplot as plt
-
-
 def word_frequency(text, words_to_check):
     text = text.lower()
     
