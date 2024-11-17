@@ -9,11 +9,7 @@ import pandas as pd
 import streamlit as st
 
 
-st.write("Available keys in st.secrets:", list(st.secrets.keys()))
 
-# Example: Check if a specific key exists
-if "OPENAI_API_KEY" not in st.secrets:
-    st.error("OPENAI_API_KEY is missing in the secrets configuration!")
 
 
 openai.api_key = st.secrets["OPENAI_API_KEY"]
