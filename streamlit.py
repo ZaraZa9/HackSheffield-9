@@ -118,6 +118,8 @@ def brain_rot_translate(input_text, selected_decade, decade_data=None):
 
 
 def generate_image_with_rate_limit(img_prompt):
+    if "OPENAI_API_KEY" not in st.secrets or not st.secrets["OPENAI_API_KEY"]:
+        raise ValueError("OpenAI API key not found. Please set the OPENAI_API_KEY")
     if not img_prompt or not img_prompt.strip():
         raise ValueError("Image prompt cannot be empty.")
 
