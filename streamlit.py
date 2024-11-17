@@ -9,9 +9,9 @@ import pandas as pd
 import streamlit as st
 
 
+OPENAI_API_KEY  = st.secrets["OPENAI_API_KEY"]
 
-
-openAI_client = OpenAI(st.secrets["OPENAI_API_KEY"])
+openAI_client = OpenAI(OPENAI_API_KEY)
 
 
 CONNECTION_STRING = st.secrets["MONGO_CONNECTION_STRING"]
