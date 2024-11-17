@@ -5,7 +5,6 @@ import openai
 from pymongo import MongoClient
 from PyPDF2 import PdfReader
 import streamlit as st
-import matplotlib.pyplot as plt
 from io import BytesIO
 import google.generativeai as genai
 from openai import OpenAI
@@ -15,7 +14,6 @@ import numpy as np
 import pandas as pd
 import altair as alt
 import streamlit as st
-import matplotlib.pyplot as plt
 from io import BytesIO
 
 
