@@ -178,8 +178,7 @@ def run_streamlit():
     uploaded_file = st.file_uploader("Upload a file (PDF or TXT)", type=["pdf", "txt"])
 
     input_text = ""
-    st.write(uploaded_file)
-    if uploaded_file != None:
+    if uploaded_file:
         if uploaded_file.type == "application/pdf":
             input_text = pdf_to_text(uploaded_file)
         else:
