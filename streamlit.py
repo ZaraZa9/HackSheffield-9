@@ -1,4 +1,3 @@
-
 import openai
 from pymongo import MongoClient
 from PyPDF2 import PdfReader
@@ -12,7 +11,7 @@ import streamlit as st
 
 
 
-openAI_client = OpenAI(st.secrets["OPENAI_API_KEY"])
+openAI_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 
 CONNECTION_STRING = st.secrets["MONGO_CONNECTION_STRING"]
